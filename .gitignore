@@ -1,0 +1,10 @@
+data/listing_info.csv
+data/submission.csv
+data/test.csv
+data/train.csv 
+data/user_behavior_logs.csv
+data/user_info.csv
+data/user_repay_logs.csv
+data/user_taglist.csv
+data/*
+*.csv
