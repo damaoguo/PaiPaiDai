@@ -1,0 +1,149 @@
+(1000000, 6435)
+start training...
+0 fold...
+Training until validation scores don't improve for 100 rounds.
+[5]	training's multi_logloss: 2.3977	valid_1's multi_logloss: 2.40549
+[10]	training's multi_logloss: 2.32156	valid_1's multi_logloss: 2.33439
+[15]	training's multi_logloss: 2.26579	valid_1's multi_logloss: 2.28281
+[20]	training's multi_logloss: 2.22334	valid_1's multi_logloss: 2.24412
+[25]	training's multi_logloss: 2.18955	valid_1's multi_logloss: 2.21399
+[30]	training's multi_logloss: 2.16363	valid_1's multi_logloss: 2.19147
+[35]	training's multi_logloss: 2.14145	valid_1's multi_logloss: 2.17264
+[40]	training's multi_logloss: 2.12303	valid_1's multi_logloss: 2.15755
+[45]	training's multi_logloss: 2.10743	valid_1's multi_logloss: 2.14533
+[50]	training's multi_logloss: 2.09406	valid_1's multi_logloss: 2.1353
+[55]	training's multi_logloss: 2.08287	valid_1's multi_logloss: 2.12745
+[60]	training's multi_logloss: 2.07237	valid_1's multi_logloss: 2.12032
+[65]	training's multi_logloss: 2.06339	valid_1's multi_logloss: 2.11461
+[70]	training's multi_logloss: 2.05559	valid_1's multi_logloss: 2.11015
+[75]	training's multi_logloss: 2.04814	valid_1's multi_logloss: 2.10595
+[80]	training's multi_logloss: 2.04113	valid_1's multi_logloss: 2.10216
+[85]	training's multi_logloss: 2.03461	valid_1's multi_logloss: 2.09884
+[90]	training's multi_logloss: 2.02861	valid_1's multi_logloss: 2.09596
+[95]	training's multi_logloss: 2.02249	valid_1's multi_logloss: 2.09302
+[100]	training's multi_logloss: 2.01712	valid_1's multi_logloss: 2.09084
+Did not meet early stopping. Best iteration is:
+[100]	training's multi_logloss: 2.01712	valid_1's multi_logloss: 2.09084
+val rmse: 469.4434105500609
+val mae: 293.060506435283
+runtime: 2619.8864753246307
+
+1 fold...
+Training until validation scores don't improve for 100 rounds.
+[5]	training's multi_logloss: 2.39753	valid_1's multi_logloss: 2.40539
+[10]	training's multi_logloss: 2.32088	valid_1's multi_logloss: 2.33375
+[15]	training's multi_logloss: 2.26476	valid_1's multi_logloss: 2.28201
+[20]	training's multi_logloss: 2.22314	valid_1's multi_logloss: 2.24434
+[25]	training's multi_logloss: 2.18955	valid_1's multi_logloss: 2.21448
+[30]	training's multi_logloss: 2.16318	valid_1's multi_logloss: 2.19164
+[35]	training's multi_logloss: 2.14092	valid_1's multi_logloss: 2.17275
+[40]	training's multi_logloss: 2.12296	valid_1's multi_logloss: 2.15826
+[45]	training's multi_logloss: 2.10726	valid_1's multi_logloss: 2.14599
+[50]	training's multi_logloss: 2.09395	valid_1's multi_logloss: 2.13607
+[55]	training's multi_logloss: 2.08306	valid_1's multi_logloss: 2.12861
+[60]	training's multi_logloss: 2.07311	valid_1's multi_logloss: 2.12199
+[65]	training's multi_logloss: 2.06318	valid_1's multi_logloss: 2.11542
+[70]	training's multi_logloss: 2.05524	valid_1's multi_logloss: 2.11078
+[75]	training's multi_logloss: 2.04747	valid_1's multi_logloss: 2.10631
+[80]	training's multi_logloss: 2.04092	valid_1's multi_logloss: 2.10291
+[85]	training's multi_logloss: 2.03413	valid_1's multi_logloss: 2.09929
+[90]	training's multi_logloss: 2.02779	valid_1's multi_logloss: 2.09622
+[95]	training's multi_logloss: 2.02216	valid_1's multi_logloss: 2.0938
+[100]	training's multi_logloss: 2.01673	valid_1's multi_logloss: 2.09152
+Did not meet early stopping. Best iteration is:
+[100]	training's multi_logloss: 2.01673	valid_1's multi_logloss: 2.09152
+val rmse: 474.3570023606946
+val mae: 293.8824422019129
+runtime: 2730.190920114517
+
+2 fold...
+Training until validation scores don't improve for 100 rounds.
+[5]	training's multi_logloss: 2.39716	valid_1's multi_logloss: 2.4052
+[10]	training's multi_logloss: 2.3212	valid_1's multi_logloss: 2.3347
+[15]	training's multi_logloss: 2.26669	valid_1's multi_logloss: 2.2848
+[20]	training's multi_logloss: 2.22311	valid_1's multi_logloss: 2.24547
+[25]	training's multi_logloss: 2.18973	valid_1's multi_logloss: 2.21611
+[30]	training's multi_logloss: 2.16242	valid_1's multi_logloss: 2.19255
+[35]	training's multi_logloss: 2.14067	valid_1's multi_logloss: 2.17445
+[40]	training's multi_logloss: 2.12177	valid_1's multi_logloss: 2.15913
+[45]	training's multi_logloss: 2.106	valid_1's multi_logloss: 2.1469
+[50]	training's multi_logloss: 2.09264	valid_1's multi_logloss: 2.13703
+[55]	training's multi_logloss: 2.08128	valid_1's multi_logloss: 2.12911
+[60]	training's multi_logloss: 2.0707	valid_1's multi_logloss: 2.12193
+[65]	training's multi_logloss: 2.06195	valid_1's multi_logloss: 2.1166
+[70]	training's multi_logloss: 2.05371	valid_1's multi_logloss: 2.11168
+[75]	training's multi_logloss: 2.04591	valid_1's multi_logloss: 2.10726
+[80]	training's multi_logloss: 2.03918	valid_1's multi_logloss: 2.10382
+[85]	training's multi_logloss: 2.03267	valid_1's multi_logloss: 2.10063
+[90]	training's multi_logloss: 2.02656	valid_1's multi_logloss: 2.09774
+[95]	training's multi_logloss: 2.02096	valid_1's multi_logloss: 2.09541
+[100]	training's multi_logloss: 2.01574	valid_1's multi_logloss: 2.09333
+Did not meet early stopping. Best iteration is:
+[100]	training's multi_logloss: 2.01574	valid_1's multi_logloss: 2.09333
+val rmse: 474.2500199988624
+val mae: 292.5232246651998
+runtime: 2745.5938758850098
+
+3 fold...
+Training until validation scores don't improve for 100 rounds.
+[5]	training's multi_logloss: 2.39779	valid_1's multi_logloss: 2.40512
+[10]	training's multi_logloss: 2.32153	valid_1's multi_logloss: 2.33406
+[15]	training's multi_logloss: 2.26552	valid_1's multi_logloss: 2.28235
+[20]	training's multi_logloss: 2.22297	valid_1's multi_logloss: 2.24362
+[25]	training's multi_logloss: 2.18918	valid_1's multi_logloss: 2.21345
+[30]	training's multi_logloss: 2.16327	valid_1's multi_logloss: 2.19095
+[35]	training's multi_logloss: 2.14115	valid_1's multi_logloss: 2.17219
+[40]	training's multi_logloss: 2.12261	valid_1's multi_logloss: 2.15707
+[45]	training's multi_logloss: 2.10703	valid_1's multi_logloss: 2.14489
+[50]	training's multi_logloss: 2.09375	valid_1's multi_logloss: 2.13496
+[55]	training's multi_logloss: 2.08259	valid_1's multi_logloss: 2.12716
+[60]	training's multi_logloss: 2.07184	valid_1's multi_logloss: 2.11976
+[65]	training's multi_logloss: 2.06296	valid_1's multi_logloss: 2.11418
+[70]	training's multi_logloss: 2.05535	valid_1's multi_logloss: 2.10982
+[75]	training's multi_logloss: 2.04799	valid_1's multi_logloss: 2.10571
+[80]	training's multi_logloss: 2.04098	valid_1's multi_logloss: 2.10199
+[85]	training's multi_logloss: 2.03453	valid_1's multi_logloss: 2.09877
+[90]	training's multi_logloss: 2.0285	valid_1's multi_logloss: 2.09592
+[95]	training's multi_logloss: 2.02259	valid_1's multi_logloss: 2.09318
+[100]	training's multi_logloss: 2.01702	valid_1's multi_logloss: 2.09061
+Did not meet early stopping. Best iteration is:
+[100]	training's multi_logloss: 2.01702	valid_1's multi_logloss: 2.09061
+val rmse: 477.00760551102053
+val mae: 294.6369493828669
+runtime: 2726.3705146312714
+
+4 fold...
+Training until validation scores don't improve for 100 rounds.
+[5]	training's multi_logloss: 2.39761	valid_1's multi_logloss: 2.40565
+[10]	training's multi_logloss: 2.32106	valid_1's multi_logloss: 2.33466
+[15]	training's multi_logloss: 2.26469	valid_1's multi_logloss: 2.28289
+[20]	training's multi_logloss: 2.22349	valid_1's multi_logloss: 2.24589
+[25]	training's multi_logloss: 2.18938	valid_1's multi_logloss: 2.21558
+[30]	training's multi_logloss: 2.16258	valid_1's multi_logloss: 2.19241
+[35]	training's multi_logloss: 2.14014	valid_1's multi_logloss: 2.17356
+[40]	training's multi_logloss: 2.12194	valid_1's multi_logloss: 2.1589
+[45]	training's multi_logloss: 2.10594	valid_1's multi_logloss: 2.14646
+[50]	training's multi_logloss: 2.09306	valid_1's multi_logloss: 2.1369
+[55]	training's multi_logloss: 2.08141	valid_1's multi_logloss: 2.12862
+[60]	training's multi_logloss: 2.0713	valid_1's multi_logloss: 2.12182
+[65]	training's multi_logloss: 2.06202	valid_1's multi_logloss: 2.1159
+[70]	training's multi_logloss: 2.05355	valid_1's multi_logloss: 2.11077
+[75]	training's multi_logloss: 2.04615	valid_1's multi_logloss: 2.10673
+[80]	training's multi_logloss: 2.03931	valid_1's multi_logloss: 2.10313
+[85]	training's multi_logloss: 2.03282	valid_1's multi_logloss: 2.09981
+[90]	training's multi_logloss: 2.02673	valid_1's multi_logloss: 2.09695/home/mao/.conda/envs/tensorflow/lib/python3.6/site-packages/sklearn/externals/joblib/externals/cloudpickle/cloudpickle.py:47: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+  import imp
+
+[95]	training's multi_logloss: 2.02101	valid_1's multi_logloss: 2.09435
+[100]	training's multi_logloss: 2.01558	valid_1's multi_logloss: 2.092
+Did not meet early stopping. Best iteration is:
+[100]	training's multi_logloss: 2.01558	valid_1's multi_logloss: 2.092
+val rmse: 475.94903737673667
+val mae: 294.28471242403134
+runtime: 2547.102654695511
+
+
+cv rmse: 474.20838771029696
+cv mae: 293.6775411785158
+cv logloss: 2.091661282758036
+cv acc: 0.414794

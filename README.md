@@ -37,5 +37,31 @@
 
 ![](https://aifile.ppdai.com/88e7c7203f444815ab950125a0304c44..png)
 
+#### 4.数据:
+
+- 标的属性表（listing_info.csv）
+
+![](./images/listing_info.png)
+
+- 样本集（train.csv和test.csv）
+
+![](./images/train.png)
+
+- **借款用户操作行为日志表（user_behavior_logs.csv）**
+
+![](./images/user_behavior_logs.png)
+
+- 用户信息表
+
+![](./images/user_info.png)
+
+- **用户还款日志表（user_repay_logs.csv）**
+
+![](./images/user_repay_logs.png)
+
+- 用户画像
+
+![](./images/user_taglist.png)
+
 ### 二. 解决思路
 
