@@ -31,4 +31,4 @@ pred_y=pd.DataFrame(pred_y)
 out=pd.DataFrame()
 out['user_id']=user_id
 out['y']=pred_y
-out.to_csv("../../data/paipaidai_01.csv")
+out.to_csv("../../data/paipaidai_01.csv",index=False)
