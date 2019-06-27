@@ -131,17 +131,12 @@ joblib.dump(clf,'../../data/paipaidai_01.pkl')
 print("start predict...")
 y_pred=clf.predict(X_test)
 y_pred=[list(x).index(max(x)) for x in y_pred]
-print(y_pred)
 print("accuracy_score:{}".format(accuracy_score(y_test,y_pred)))
 print("混淆矩阵:")
 print(confusion_matrix(y_test, y_pred))
 
-
-
-
-
 pred_y=clf.predict(test_X)
 pred_y=np.array(pred_y)
 
-ouput=pd.DataFrame(pred_y)
+output=pd.DataFrame(pred_y)
 output.to_csv("../../data/paipaidai_01.csv")
