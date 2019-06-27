@@ -9,10 +9,6 @@
     方案思路：33分类。
               label为还款日期距成交日期的天数，可能的情况有0天到31天，未还款定义为32，一共33个类别。
               预测出每个label对应的概率，然后分别乘以应还的金额，就是每天需要还的金额。
-    线上分数：8500左右。
-              特征还有很多可以做，并且behavior表还没用，repay_logs表也还有很多有价值的东西没提取，因此分数还能提高。
-    主要问题：线下验证分数不靠谱，线上波动很大。
-              线下分类acc很低，需要找准特征工程的方向来提高分类准确率，此题当作分类任务和当作回归任务时的特征工程方向可能差别很大。
 """
 
 import pandas as pd
@@ -31,7 +27,9 @@ pd.set_option('display.max_columns', None)
 
 
 
-
+#########################################################################################
+# 加载训练数据
+#########################################################################################
 train_df = pd.read_csv('../data/train.csv', parse_dates=['auditing_date', 'due_date', 'repay_date'])
 
 train_df['repay_date'] = train_df[['due_date', 'repay_date']].apply(
@@ -39,37 +37,68 @@ train_df['repay_date'] = train_df[['due_date', 'repay_date']].apply(
 )
 
 train_df['repay_amt'] = train_df['repay_amt'].apply(lambda x: x if x != '\\N' else 0).astype('float32')
+
+# 标签是到还款日距离这测日的天数
 train_df['label'] = (train_df['repay_date'] - train_df['auditing_date']).dt.days
+
+# 还款金额为0的行标签为0
 train_df.loc[train_df['repay_amt'] == 0, 'label'] = 32
 
 clf_labels = train_df['label'].values
 amt_labels = train_df['repay_amt'].values
+
 del train_df['label'], train_df['repay_amt'], train_df['repay_date']
+
 train_due_amt_df = train_df[['due_amt']]
+# 记录训练数据集合的条数
 train_num = train_df.shape[0]
 
+#########################################################################################
+# 加载测试数据
+#########################################################################################
 
 test_df = pd.read_csv('../data/test.csv', parse_dates=['auditing_date', 'due_date'])
 sub = test_df[['listing_id', 'auditing_date', 'due_amt']]
+# 训练集和测试集合合并
 df = pd.concat([train_df, test_df], axis=0, ignore_index=True)
 
 
+#########################################################################################
+# 加载标信息
+#########################################################################################
 listing_info_df = pd.read_csv('../data/listing_info.csv')
 del listing_info_df['user_id'], listing_info_df['auditing_date']
+
+# 拼接历史log
 df = df.merge(listing_info_df, on='listing_id', how='left')
 
+
+#########################################################################################
+# 加载用户数据
+#########################################################################################
 # 表中有少数user不止一条记录，因此按日期排序，去重，只保留最新的一条记录。
 user_info_df = pd.read_csv('../data/user_info.csv', parse_dates=['reg_mon', 'insertdate'])
 user_info_df.rename(columns={'insertdate': 'info_insert_date'}, inplace=True)
 user_info_df = user_info_df.sort_values(by='info_insert_date', ascending=False).drop_duplicates('user_id').reset_index(drop=True)
+
+# 拼接用户信息
 df = df.merge(user_info_df, on='user_id', how='left')
 
+
+#########################################################################################
+# 加载用户画像
+#########################################################################################
 # 同上
 user_tag_df = pd.read_csv('../data/user_taglist.csv', parse_dates=['insertdate'])
 user_tag_df.rename(columns={'insertdate': 'tag_insert_date'}, inplace=True)
 user_tag_df = user_tag_df.sort_values(by='tag_insert_date', ascending=False).drop_duplicates('user_id').reset_index(drop=True)
 df = df.merge(user_tag_df, on='user_id', how='left')
 
+
+
+#########################################################################################
+# 加载历史数据
+#########################################################################################
 # 历史记录表能做的特征远不止这些
 repay_log_df = pd.read_csv('../data/user_repay_logs.csv', parse_dates=['due_date', 'repay_date'])
 # 由于题目任务只预测第一期的还款情况，因此这里只保留第一期的历史记录。当然非第一期的记录也能提取很多特征。
@@ -100,11 +129,20 @@ del repay_log_df['repay'], repay_log_df['early_repay_days'], repay_log_df['due_a
 repay_log_df = repay_log_df.drop_duplicates('user_id').reset_index(drop=True)
 df = df.merge(repay_log_df, on='user_id', how='left')
 
+
+
+
+#########################################################################################
+# 处理合并后的数据
+#########################################################################################
+# 性别,电话,省份,城市
 cate_cols = ['gender', 'cell_province', 'id_province', 'id_city']
 for f in cate_cols:
     df[f] = df[f].map(dict(zip(df[f].unique(), range(df[f].nunique())))).astype('int32')
 
 df['due_amt_per_days'] = df['due_amt'] / (train_df['due_date'] - train_df['auditing_date']).dt.days
+
+# 时间相关特征
 date_cols = ['auditing_date', 'due_date', 'reg_mon', 'info_insert_date', 'tag_insert_date']
 for f in date_cols:
     if f in ['reg_mon', 'info_insert_date', 'tag_insert_date']:
@@ -115,17 +153,32 @@ for f in date_cols:
         df[f + '_dayofweek'] = df[f].dt.dayofweek
 df.drop(columns=date_cols, axis=1, inplace=True)
 
+# 用户画像
 df['taglist'] = df['taglist'].astype('str').apply(lambda x: x.strip().replace('|', ' ').strip())
 tag_cv = CountVectorizer(min_df=10, max_df=0.9).fit_transform(df['taglist'])
 
 del df['user_id'], df['listing_id'], df['taglist']
 
+# 将数据离散化
 df = pd.get_dummies(df, columns=cate_cols)
 df = sparse.hstack((df.values, tag_cv), format='csr', dtype='float32')
 # 切分数据
+
+
+
+#########################################################################################
+# 将之前合并的数据进行分开,进行保存!!!
+#########################################################################################
 train_values, test_values = df[:train_num], df[train_num:]
 
 
+
+
+
+
+#########################################################################################
+# 训练模型
+#########################################################################################
 print(train_values.shape)
 # 五折验证也可以改成一次验证，按时间划分训练集和验证集，以避免由于时序引起的数据穿越问题。
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=2019)
@@ -139,6 +192,8 @@ clf = LGBMClassifier(
 )
 amt_oof = np.zeros(train_num)
 prob_oof = np.zeros((train_num, 33))
+
+# 保存测试集的预测结果
 test_pred_prob = np.zeros((test_values.shape[0], 33))
 
 print("start training...")
@@ -164,6 +219,8 @@ for i, (trn_idx, val_idx) in enumerate(skf.split(train_values, clf_labels)):
     print('val rmse:', np.sqrt(mean_squared_error(val_repay_amt, val_pred_repay_amt)))
     print('val mae:', mean_absolute_error(val_repay_amt, val_pred_repay_amt))
     amt_oof[val_idx] = val_pred_repay_amt
+
+    # 对于测试集预测五次,直接在这里求了五次计算的均值
     test_pred_prob += clf.predict_proba(test_values, num_iteration=clf.best_iteration_) / skf.n_splits
 
     print('runtime: {}\n'.format(time.time() - t))
