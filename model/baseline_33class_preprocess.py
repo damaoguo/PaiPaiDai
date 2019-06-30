@@ -23,6 +23,9 @@ warnings.filterwarnings('ignore')
 pd.set_option('display.max_columns', None)
 
 
+#########################################################################################
+# 加载训练数据
+#########################################################################################
 #训练集，将标的成交日期、应还款日期和实际还款日期解析为时间格式
 
 train_df = pd.read_csv('../data/train.csv', parse_dates=['auditing_date', 'due_date', 'repay_date'])
@@ -37,7 +40,11 @@ train_df['repay_date'] = train_df[['due_date', 'repay_date']].apply(
 
 train_df['repay_amt'] = train_df['repay_amt'].apply(lambda x: x if x != '\\N' else 0).astype('float32')
 
+# 标签
 train_df['label'] = (train_df['repay_date'] - train_df['auditing_date']).dt.days#实际还款日期-成交日期，将其作为标签label
+train_df['label_r'] = (train_df['due_date'] - train_df['repay_date']).dt.days#到期日减去实际还款日期，将其作为标签label
+
+
 
 train_df.loc[train_df['repay_amt'] == 0, 'label'] = 32#实际还款金额为0的，都是逾期的，将其分类label变为32
 
@@ -45,6 +52,8 @@ train_df.loc[train_df['repay_amt'] == 0, 'label'] = 32#实际还款金额为0的
 # 构建不同的标签数据
 train_labels=pd.DataFrame()
 train_labels['label_32']=train_df['label']
+train_labels['label_32_r']=train_df['label_r']
+
 train_labels['label_2']=train_df['label']
 
 train_labels.loc[train_labels['label_2']!=32,'label_2']=0
@@ -54,7 +63,7 @@ clf_labels = train_df['label'].values#标签一列，为0-32的数
 
 amt_labels = train_df['repay_amt'].values#实际还款金额一列
 
-del train_df['label'], train_df['repay_amt'], train_df['repay_date']#将没有用的三列删除，这样训练集和测试集的字段就相同了
+del train_df['label'],train_df['label_r'], train_df['repay_amt'], train_df['repay_date']#将没有用的三列删除，这样训练集和测试集的字段就相同了
 
 
 
@@ -63,6 +72,10 @@ train_due_amt_df = train_df[['due_amt']]#应还款金额
 
 train_num = train_df.shape[0]#样本数量
 
+
+#########################################################################################
+# 加载测试数据
+#########################################################################################
 test_df = pd.read_csv('../data/test.csv', parse_dates=['auditing_date', 'due_date'])#读入测试数据，将成交日期和应还款日期解析为日期格式
 
 sub = test_df[['listing_id', 'auditing_date', 'due_amt']]#标的id+成交日期+应还款金额
@@ -70,7 +83,9 @@ sub = test_df[['listing_id', 'auditing_date', 'due_amt']]#标的id+成交日期+
 df = pd.concat([train_df, test_df], axis=0, ignore_index=True)
 
 
-
+#########################################################################################
+# 加载标信息
+#########################################################################################
 listing_info_df = pd.read_csv('../data/listing_info.csv')#标的属性表
 
 del listing_info_df['user_id'], listing_info_df['auditing_date']#将用户id和标的成交日期删除，因为这两项在训练集和测试集中都存在
@@ -78,9 +93,10 @@ del listing_info_df['user_id'], listing_info_df['auditing_date']#将用户id和�
 df = df.merge(listing_info_df, on='listing_id', how='left')
 
 
-
+#########################################################################################
+# 加载用户数据
+#########################################################################################
 # 表中有少数user不止一条记录，因此按日期排序，去重，只保留最新的一条记录。
-
 user_info_df = pd.read_csv('../data/user_info.csv', parse_dates=['reg_mon', 'insertdate'])#用户基础信息表
 
 user_info_df.rename(columns={'insertdate': 'info_insert_date'}, inplace=True)#将用户数据的插入日期重命名
@@ -117,23 +133,31 @@ user_info_df_2['map_age']=user_info_df_2['age'].map(map_age)
 df = df.merge(user_info_df_2, on='user_id', how='left')#将用户基础信息表合并到训练集之中
 
 
+#########################################################################################
+# 加载用户画像
+#########################################################################################
 
 #用户画像标签列表，同样如上操作，排序去重合并
-
+# 时间相关
 user_tag_df = pd.read_csv('../data/user_taglist.csv', parse_dates=['insertdate'])
-
 user_tag_df.rename(columns={'insertdate': 'tag_insert_date'}, inplace=True)
-
 user_tag_df_1 = user_tag_df.sort_values(by='tag_insert_date', ascending=False).drop_duplicates('user_id').reset_index(drop=True)
-
 modifyTagListNum=user_tag_df.groupby('user_id').count()['tag_insert_date'].to_frame().rename(columns={'tag_insert_date':'modify_taglist_num'})
-
 user_tag_df_2=pd.merge(user_tag_df_1,modifyTagListNum,how='left',on='user_id')
 
+# 聚类后相关,对于缺省的数值进行填充!
+user_tag_label_df=pd.read_csv('../data/user_tags_to_use.csv')
+user_tag_label_df.drop_duplicates(subset=['user_id'],keep='last')
+
+
 df = df.merge(user_tag_df_2, on='user_id', how='left')
+# 对于缺省值填充
+df = df.merge(user_tag_label_df, on='user_id', how='left')
+df['user_tag']=df['user_tag'].fillna(10)
 
-
-
+#########################################################################################
+# 加载历史数据
+#########################################################################################
 user_behavior_logs = pd.read_csv('../data/user_behavior_logs.csv', parse_dates=['behavior_time'])
 
 user_behavior_logs_1=user_behavior_logs.groupby('user_id').count()['behavior_type'].to_frame().rename(columns={'behavior_type':'behavior_num'})
@@ -251,9 +275,16 @@ del df['taglist']#这下就可以将用户id、标的id和用户画像标签删�
 
 df = pd.get_dummies(df, columns=cate_cols)#做独热编码
 
+
+#########################################################################################
+# 将之前合并的数据进行分开,进行保存!!!
+#########################################################################################
 train_values, test_values = df[:train_num], df[train_num:]#拆分训练集和测试集，之前训练集和测试集是放在一起学习的
 
+
+# 多分类以及二分类
 train_values['label_32']=train_labels['label_32']
+train_values['label_32_r']=train_labels['label_32_r']
 train_values['label_2']=train_labels['label_2']
 
 print("process over")
