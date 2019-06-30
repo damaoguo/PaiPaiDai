@@ -280,6 +280,37 @@ df = pd.get_dummies(df, columns=cate_cols)#做独热编码
 
 
 #########################################################################################
+# 将用户的user_id转换为数值,带入模型参与训练
+# 用户的id最长为6位,最小为1位
+"""
+   user_id_0  user_id_1  user_id_2  user_id_3  user_id_4  user_id_5
+0          0          0          0          0          1          2
+1          0          0          0          0          2          3
+2          0          0          0          0          4          5
+3          0          0          0          3          2          4
+4          0          0          0          0          5          6
+5          0          1          2          4          5          6
+6          0          0          9          8          7          6
+"""
+#########################################################################################
+user_id_encode=pd.DataFrame()
+user_id_encode['user_id']=df['user_id']
+
+def encode_method(num):
+    res=[0,0,0,0,0,0]
+    s=str(num)
+    s=s[::-1]
+    for (i,c) in zip(range(6),s):
+        res[5-i]=int(c)
+    return res
+
+user_id_encode_index=['user_id_0','user_id_1','user_id_2','user_id_3','user_id_4','user_id_5']
+
+user_id_encode[user_id_encode_index]=df['user_id'].apply(lambda x: pd.Series(encode_method(x)))
+
+df = df.merge(user_id_encode, on='user_id', how='left')
+
+#########################################################################################
 # 将之前合并的数据进行分开,进行保存!!!
 #########################################################################################
 # 拆分训练集和测试集，之前训练集和测试集是放在一起学习的
