@@ -148,16 +148,26 @@ user_tag_df.rename(columns={'insertdate': 'tag_insert_date'}, inplace=True)
 user_tag_df_1 = user_tag_df.sort_values(by='tag_insert_date', ascending=False).drop_duplicates('user_id').reset_index(drop=True)
 modifyTagListNum=user_tag_df.groupby('user_id').count()['tag_insert_date'].to_frame().rename(columns={'tag_insert_date':'modify_taglist_num'})
 user_tag_df_2=pd.merge(user_tag_df_1,modifyTagListNum,how='left',on='user_id')
+df = df.merge(user_tag_df_2, on='user_id', how='left')
+
+
 
 # 聚类后拼接
 user_tag_label_df=pd.read_csv('../data/user_tags_to_use.csv')
-user_tag_label_df.drop_duplicates(subset=['user_id'],keep='last')
+
+user_tag_label_df=user_tag_label_df.drop_duplicates(subset=['user_id'],keep='last')
 
 
-df = df.merge(user_tag_df_2, on='user_id', how='left')
+
 # 对于缺省值填充
 df = df.merge(user_tag_label_df, on='user_id', how='left')
 df['user_tag']=df['user_tag'].fillna(10)
+
+print("-------------------------------------------------------------------")
+print('position 1',df.shape)
+print("-------------------------------------------------------------------")
+
+
 
 #########################################################################################
 # 加载历史数据
@@ -168,6 +178,9 @@ user_behavior_logs_1=user_behavior_logs.groupby('user_id').count()['behavior_typ
 
 df = df.merge(user_behavior_logs_1, on='user_id', how='left')
 
+print("-------------------------------------------------------------------")
+print('position 2',df.shape)
+print("-------------------------------------------------------------------")
 
 
 #基于全部还款记录计算每位user的逾期率
@@ -179,6 +192,10 @@ user_repay_logs['expire']=np.where(user_repay_logs['repay_date']=='2200-01-01',1
 expire_cnt_ratio=user_repay_logs.groupby('user_id')['expire'].agg({'repay_mean':'mean'}).reset_index()
 
 df = df.merge(expire_cnt_ratio, on='user_id', how='left')
+
+print("-------------------------------------------------------------------")
+print('position 3',df.shape)
+print("-------------------------------------------------------------------")
 
 
 
@@ -240,6 +257,10 @@ repay_log_df = repay_log_df.drop_duplicates('user_id').reset_index(drop=True)#�
 
 df = df.merge(repay_log_df, on='user_id', how='left')#将由用户还款日志提取的用户相关统计信息，返回加到样本集中
 
+print("-------------------------------------------------------------------")
+print('position 4',df.shape)
+print("-------------------------------------------------------------------")
+
 
 #性别、手机号码归属省份、身份证归属省份、身份证归属城市
 cate_cols = ['gender', 'cell_province', 'id_province', 'id_city','foreign_land','map_age']
@@ -277,7 +298,9 @@ del df['taglist']#这下就可以将用户id、标的id和用户画像标签删�
 
 
 df = pd.get_dummies(df, columns=cate_cols)#做独热编码
-
+print("-------------------------------------------------------------------")
+print('position 5',df.shape)
+print("-------------------------------------------------------------------")
 
 #########################################################################################
 # 将用户的user_id转换为数值,带入模型参与训练
@@ -293,8 +316,9 @@ df = pd.get_dummies(df, columns=cate_cols)#做独热编码
 6          0          0          9          8          7          6
 """
 #########################################################################################
+# 用户id有重合的!
 user_id_encode=pd.DataFrame()
-user_id_encode['user_id']=df['user_id']
+user_id_encode['user_id']=df['user_id'].unique()
 
 def encode_method(num):
     res=[0,0,0,0,0,0]
@@ -309,6 +333,11 @@ user_id_encode_index=['user_id_0','user_id_1','user_id_2','user_id_3','user_id_4
 user_id_encode[user_id_encode_index]=df['user_id'].apply(lambda x: pd.Series(encode_method(x)))
 
 df = df.merge(user_id_encode, on='user_id', how='left')
+
+print("-------------------------------------------------------------------")
+print('position 6',df.shape)
+print("-------------------------------------------------------------------")
+
 
 #########################################################################################
 # 将之前合并的数据进行分开,进行保存!!!
@@ -325,3 +354,5 @@ train_values['label_2']=train_labels['label_2']
 print("process over")
 train_values.to_csv("../data/train_values.csv",index=False)
 test_values.to_csv("../data/test_values.csv",index=False)
+
+
