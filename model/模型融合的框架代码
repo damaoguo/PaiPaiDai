@@ -1,0 +1,69 @@
+clfs = [RandomForestClassifier(n_estimators = 400,max_depth=3, random_state = 60, verbose = 1, n_jobs = -1),    
+        GradientBoostingClassifier(learning_rate=0.05,random_state=10),
+        LogisticRegression(class_weight='balanced',random_state = 70,solver='lbfgs'),
+        XGBClassifier( scale_pos_weight = 10 , seed=1) ]    # 单模型参数模型
+
+train_label = np.array(y_label)
+
+####stacking模型####
+def get_stacking(clf, x_train, y_train, x_test, n_folds=5):
+    train_num, test_num = x_train.shape[0], x_test.shape[0]
+    second_level_train_set = np.zeros((train_num,))           
+    second_level_test_set = np.zeros((test_num,))
+    test_nfolds_sets = np.zeros((test_num, n_folds))
+    skf = StratifiedKFold(n_splits=5, random_state=0, shuffle=False)
+
+    for i,(train_index, test_index) in enumerate(skf.split(x_train,y_train)):
+        x_tra, y_tra = x_train[train_index], y_train[train_index]
+        x_tst, y_tst =  x_train[test_index], y_train[test_index]
+
+        clf.fit(x_tra, y_tra)
+
+        second_level_train_set[test_index] = clf.predict_proba(x_tst)[:,1]    # 训练集上的预测
+        test_nfolds_sets[:,i] = clf.predict_proba(x_test)[:,1]                # 每个模型测试集上的预测(列数为n_folds)
+
+    second_level_test_set[:] = test_nfolds_sets.mean(axis=1)       # 每个模型测试集预测上的均值
+    return second_level_train_set, second_level_test_set           # 构建第二层模型的输入
+
+train_sets = []
+test_sets = []
+for clf in clfs:
+    train_set1, test_set1 = get_stacking(clf, train3, train_label, test01)
+    train_sets.append(train_set1)
+    test_sets.append(test_set1)
+
+meta_train = np.concatenate([result_set.reshape(-1,1) for result_set in train_sets], axis=1)    # 第一层训练集的预测
+meta_test = np.concatenate([y_test_set.reshape(-1,1) for y_test_set in test_sets], axis=1)      # 第一层测试集的预测
+
+dt_model = LogisticRegression()     # 第二层选用的模型
+dt_model.fit(meta_train, train_label)
+df_predict = dt_model.predict_proba(meta_test)[:,1]    
+
+#### blending模型 ####
+from sklearn.model_selection import StratifiedShuffleSplit
+split1 = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=47)
+for train_index1, test_index1 in split1.split(train3 , train_label):
+    X_d1 = train3.loc[train_index1]
+    X_d2 = train3.loc[test_index1]
+    y_d1 = train_label.loc[train_index1]
+    y_d2 = train_label.loc[test_index1]
+# train set in the second layer
+dataset_d1 = np.zeros((X_d2.shape[0], len(clfs)))
+# test set in the second layer
+dataset_d2 = np.zeros((test3.shape[0], len(clfs)))
+
+# model in the first layer
+for j, clf in enumerate(clfs):
+    # train each submodel
+    print(j, clf)
+    # use the validset as the features in the second layer
+    clf.fit(X_d1, y_d1)
+    y_submission = clf.predict_proba(X_d2)[:, 1]
+    dataset_d1[:, j] = y_submission
+    # use the trained submodel to predict the test set
+    dataset_d2[:, j] = clf.predict_proba(test3)[:, 1]
+
+# model in the second layer
+clf1 = LogisticRegression()
+clf1.fit(dataset_d1, y_d2)
+y_submission1 = clf1.predict_proba(dataset_d2)[:, 1]     
