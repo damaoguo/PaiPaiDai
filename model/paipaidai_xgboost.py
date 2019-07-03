@@ -14,28 +14,31 @@ import pandas as pd
 import numpy as np
 import time
 import threading
+import pickle
 
 start_time=time.time()
 print("start load data...")
-train_values, test_values,clf_labels,amt_labels,train_due_amt_df,sub,train_num=load_2()
+train_values, test_values,clf_labels,amt_labels,train_due_amt_df,sub=load_2()
+
 print("load data over,time cost:",time.time()-start_time)
 
-X,Y=train_values[:1000],clf_labels[:1000]
+X,Y=train_values.values,clf_labels
 
 params={
     'max_depth':12,
     'learning_rate':0.05,
     'n_estimators':752,
     'silent':True,
-    'objective':"multi:softmax",
+    # 'objective':"multi:softmax",
+    'objective': "multi:softprob",
     'nthread':4,
     'gamma':0,
     'max_delta_step':0,
     'subsample':1,
     'colsample_bytree':0.9,
     'colsample_bylevel':0.9,
-    'reg_alpha':1,
-    'reg_lambda':1,
+    # 'reg_alpha':1,
+    # 'reg_lambda':1,
     'scale_pos_weight':1,
     'base_score':0.5,
     'seed':2019,
@@ -47,7 +50,7 @@ plst = list(params.items())
 num_rounds = 5000 # 迭代次数
 
 # 测试集数据
-xgb_test=xgb.DMatrix(test_values)
+xgb_test=xgb.DMatrix(test_values.values)
 
 from sklearn.model_selection import StratifiedKFold
 
@@ -80,10 +83,13 @@ if __name__ == '__main__':
     main()
 
     test_pred_prob = np.zeros((test_values.shape[0], 33))
+
     for index in range(0,5):
         bst=xgb.Booster({'nthread':4})
         bst.load_model('../data/xgb%s.model'%str(index))
+        # print(bst.predict(xgb_test))
         test_pred_prob += bst.predict(xgb_test)/5
+
     prob_cols = ['prob_{}'.format(i) for i in range(33)]  # prob_0 至 prob_32
 
     for i, f in enumerate(prob_cols):  # 遍历每一个prob_i
