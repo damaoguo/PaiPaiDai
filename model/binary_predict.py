@@ -51,7 +51,7 @@ outcome.to_csv("../data/binary_train_predict.csv",index=False)
 # 绘制混淆矩阵
 
 alphabet=softwares=["yes","no"]
-figures.plot_confusion_matrix(y_train, y_train,alphabet, "../data/confusion.png")
+figures.plot_confusion_matrix(y_train, clf_labels_2,alphabet, "../data/confusion.png")
 
 
 

@@ -3,10 +3,9 @@
 """
 @author: TianMao
 @contact: tianmao1994@yahoo.com
-@file: baseline_33class_v2_predict.py
-@time: 19-6-28 上午8:49
-@desc: 通过训练好的模型,计算天数的概率,取最大还款的日期
-(即不使用每天都有还款,只在最可能还款的那天还全部的款,当标签为32的时候意味着超期没有还钱)
+@file: submission.py
+@time: 19-7-4 上午8:47
+@desc:
 """
 
 import time
@@ -15,6 +14,8 @@ import numpy as np
 import pandas as pd
 from load_data import load_2
 import figures
+import xgboost as xgb
+
 
 train_values, test_values,clf_labels,amt_labels,train_due_amt_df,sub=load_2()
 
@@ -22,33 +23,33 @@ test=pd.read_csv("../data/test.csv")
 listing_id=test['listing_id']
 repay_amt=test['due_amt']
 
-test_pred_prob = np.zeros((test_values.shape[0], 33))#测试集个数作为行数，33为列数，测试集每天的还款概率
-train_pred_prob = np.zeros((train_values.shape[0], 33))
+# test_pred_prob = np.zeros((test_values.shape[0], 33))#测试集个数作为行数，33为列数，测试集每天的还款概率
+#
+#
+# for i in range(5):#特征数据，标签
+#
+#     print(i, 'fold...')
+#
+#     t = time.time()
+#     clf=joblib.load('../data/paipaidai_v3_%d.pkl'%i)
+#
+#     test_pred_prob += clf.predict_proba(test_values.values, num_iteration=clf.best_iteration_) / 5#每个测试集样本的33个类别概率
 
 
-for i in range(5):#特征数据，标签
+test_pred_prob = np.zeros((test_values.shape[0], 33))
 
-    print(i, 'fold...')
+# 测试集数据
+xgb_test=xgb.DMatrix(test_values.values)
+for index in range(0,5):
+    print(index," fold...")
+    bst=xgb.Booster({'nthread':4})
+    bst.load_model('../data/xgb%s.model'%str(index))
+    # print(bst.predict(xgb_test))
+    test_pred_prob += bst.predict(xgb_test)/5
 
-    t = time.time()
-    clf=joblib.load('../data/paipaidai_v3_%d.pkl'%i)
 
-    test_pred_prob += clf.predict_proba(test_values.values, num_iteration=clf.best_iteration_) / 5#每个测试集样本的33个类别概率
-    train_pred_prob += clf.predict_proba(train_values.values, num_iteration=clf.best_iteration_) / 5
 
 y_pred=[list(x).index(max(x)) for x in test_pred_prob]
-
-
-
-########################################################################
-# 绘制混淆矩阵(33分类)
-########################################################################
-y_pred_train=[list(x).index(max(x)) for x in train_pred_prob]
-
-alphabet=softwares=["day_%d"%i for i in range(33)]
-figures.plot_confusion_matrix(y_pred_train, clf_labels,alphabet, "../data/33class")
-
-
 
 
 
@@ -95,6 +96,16 @@ prob_cols = ['prob_{}'.format(i) for i in range(33)]#prob_0 至 prob_32
 for i, f in enumerate(prob_cols):
     sub[f] = test_pred_prob[:, i]
 
+prob_cols_2 = ['prob_{}'.format(i) for i in range(32)]
+
+sub['sum'] = sub[prob_cols_2].apply(lambda x: x.sum(), axis=1)
+
+for f in prob_cols_2:
+    sub[f] = sub[f]/sub['sum']
+
+
+del sub['sum']
+
 sub['y']=y_pred
 sub_example = pd.read_csv('../data/submission.csv', parse_dates=['repay_date'])
 
@@ -122,4 +133,4 @@ drop_left['repay_amt']=None
 
 sub_example=pd.concat([sub_example,drop_left],axis=0)
 
-sub_example[['listing_id', 'repay_date', 'repay_amt']].to_csv('../data/paipaidai_33class.csv', index=False)
+sub_example[['listing_id', 'repay_date', 'repay_amt']].to_csv('../data/paipaidai_xgboost.csv', index=False)

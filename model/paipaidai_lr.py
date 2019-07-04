@@ -15,6 +15,8 @@ import pandas as pd
 
 train_values, test_values,clf_labels,amt_labels,train_due_amt_df,sub=load_2()
 # print(train_values.isnull().sum())
+print("load data over...")
+
 
 train_values=train_values.fillna(0)
 test_values=test_values.fillna(0)
@@ -31,10 +33,13 @@ X_test_std = sc.transform(X_test)
 
 lr = LogisticRegression(C=1000.0, random_state=0)
 
+print("start training")
 lr.fit(X_train_std, clf_labels)
-
+print("training over....")
 
 test_pred_prob = np.zeros((test_values.shape[0], 33))
+
+
 test_pred_prob = lr.predict_proba(X_test_std)
 
 prob_cols = ['prob_{}'.format(i) for i in range(33)]  # prob_0 至 prob_32
